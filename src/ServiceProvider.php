@@ -10,6 +10,7 @@ use Freyo\Flysystem\QcloudCOSv5\Plugins\GetUrl;
 use Freyo\Flysystem\QcloudCOSv5\Plugins\PutRemoteFile;
 use Freyo\Flysystem\QcloudCOSv5\Plugins\PutRemoteFileAs;
 use Freyo\Flysystem\QcloudCOSv5\Plugins\TCaptcha;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
 use Laravel\Lumen\Application as LumenApplication;
 use League\Flysystem\Filesystem;
@@ -32,21 +33,15 @@ class ServiceProvider extends LaravelServiceProvider
         }
 
         $this->app->make('filesystem')
-                  ->extend('cosv5', function ($app, $config) {
-                      $client = new Client($config);
-                      $flysystem = new Filesystem(new Adapter($client, $config), $config);
-
-                      $flysystem->addPlugin(new PutRemoteFile());
-                      $flysystem->addPlugin(new PutRemoteFileAs());
-                      $flysystem->addPlugin(new GetUrl());
-                      $flysystem->addPlugin(new CDN());
-                      $flysystem->addPlugin(new TCaptcha());
-                      $flysystem->addPlugin(new GetFederationToken());
-                      $flysystem->addPlugin(new GetFederationTokenV3());
-                      $flysystem->addPlugin(new CloudInfinite());
-
-                      return $flysystem;
-                  });
+            ->extend('cosv5', function ($app, $config) {
+                $adapter = new Adapter(new Client($config), $config);
+                
+                return new FilesystemAdapter(
+                    new Filesystem($adapter, $config),
+                    $adapter,
+                    $config
+                );
+            });
     }
 
     /**
