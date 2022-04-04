@@ -136,10 +136,9 @@ class Adapter implements FilesystemAdapter
             'Scheme' => isset($this->config['scheme']) ? $this->config['scheme'] : 'http',
         ];
 
-        $objectUrl = $this->client->getObjectUrl(
+        $objectUrl = $this->client->getObjectUrlWithoutSign(
             $this->getBucketWithAppId(),
             $path,
-            "+30 minutes",
             $options
         );
 
